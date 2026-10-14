@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+		<title>As-built Field Verification</title>
+
+		<!-- PWA -->
+		<link rel="manifest" href="manifest.webmanifest" />
+		<meta name="theme-color" content="#003d61" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta
+			name="apple-mobile-web-app-status-bar-style"
+			content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Field Verify" />
+		<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+		<link rel="icon" href="assets/icon-192.png" />
+
+		<!-- Calcite Components -->
+		<link
+			rel="stylesheet"
+			href="https://js.arcgis.com/calcite-components/3.3.0/calcite.css" />
+		<script
+			type="module"
+			src="https://js.arcgis.com/calcite-components/3.3.0/calcite.esm.js"></script>
+
+		<!-- ArcGIS Maps SDK for JavaScript -->
+		<link
+			rel="stylesheet"
+			href="https://js.arcgis.com/4.33/esri/themes/light/main.css" />
+		<script src="https://js.arcgis.com/4.33/"></script>
+
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<!-- ========================= App shell ========================= -->
+		<calcite-shell id="appShell" hidden>
+			<calcite-navigation slot="header">
+				<calcite-action
+					id="menuToggle"
+					slot="navigation-action"
+					icon="hamburger"
+					text="Toggle panel"></calcite-action>
+
+				<calcite-navigation-logo
+					slot="logo"
+					heading="As-built Field Verification"
+					thumbnail="assets/logo.png"></calcite-navigation-logo>
+
+				<calcite-navigation-user
+					id="navUser"
+					slot="user"
+					hidden></calcite-navigation-user>
+
+				<calcite-action
+					id="signOutBtn"
+					slot="content-end"
+					text="Sign out"
+					text-enabled
+					icon="sign-out"
+					hidden></calcite-action>
+			</calcite-navigation>
+
+			<!-- Left panel: layers + unverified counts -->
+			<calcite-shell-panel
+				id="primaryPanel"
+				slot="panel-start"
+				display-mode="dock"
+				width-scale="m">
+				<calcite-panel
+					heading="Unverified assets"
+					description="Only features that still need verification are shown">
+					<calcite-block
+						open
+						heading="Layers"
+						description="Toggle visibility"
+						collapsible>
+						<calcite-icon slot="icon" icon="layers"></calcite-icon>
+						<div id="layerListContainer"></div>
+					</calcite-block>
+
+					<calcite-block open heading="Pending verification">
+						<calcite-icon
+							slot="icon"
+							icon="exclamation-mark-triangle"></calcite-icon>
+						<calcite-list id="countList"></calcite-list>
+					</calcite-block>
+
+					<calcite-button
+						id="refreshBtn"
+						slot="footer"
+						width="full"
+						appearance="outline"
+						icon-start="refresh"
+						>Refresh</calcite-button
+					>
+				</calcite-panel>
+			</calcite-shell-panel>
+
+			<!-- The map -->
+			<div id="viewDiv"></div>
+		</calcite-shell>
+
+		<!-- ========================= Sign-in overlay ========================= -->
+		<div id="signInOverlay">
+			<calcite-card id="signInCard">
+				<div class="signin-brand">
+					<img src="assets/logo.png" alt="KOSAP logo" class="signin-logo" />
+				</div>
+				<span slot="heading">As-built field verification app</span>
+				<span slot="description">
+					Sign in with your ArcGIS (Esri Eastern Africa portal) credentials to
+					review and verify minigrid field assets.
+				</span>
+				<div class="signin-body">
+					<calcite-notice
+						id="signInError"
+						kind="danger"
+						icon="exclamation-mark-triangle"
+						hidden
+						width="full">
+						<div slot="message"></div>
+					</calcite-notice>
+					<calcite-button id="signInBtn" width="full" icon-start="sign-in"
+						>Sign in with ArcGIS</calcite-button
+					>
+				</div>
+			</calcite-card>
+		</div>
+
+		<!-- Loader shown while SDK boots / checks session -->
+		<calcite-scrim id="bootScrim" loading></calcite-scrim>
+
+		<!-- Transient toast notifications -->
+		<calcite-alert
+			id="toast"
+			icon
+			auto-close
+			auto-close-duration="medium"
+			placement="bottom">
+			<div slot="title" id="toastTitle"></div>
+			<div slot="message" id="toastMsg"></div>
+		</calcite-alert>
+
+		<script src="app.js"></script>
+		<script>
+			// Register the service worker for PWA / offline shell caching.
+			if ("serviceWorker" in navigator) {
+				window.addEventListener("load", () => {
+					navigator.serviceWorker
+						.register("sw.js")
+						.catch((err) =>
+							console.warn("Service worker registration failed:", err)
+						);
+				});
+			}
+		</script>
+	</body>
+</html>
